@@ -19,7 +19,7 @@ from time import time
 import threading
 
 # Replace with the Arduino port. Can be found in the Arduino IDE (Tools -> Port:)
-port = "COM0"
+port = "COM6"
 baudrate = 115200
 qube = QUBE(port, baudrate)
 
@@ -33,7 +33,7 @@ enableLogging()
 t_last = time()
 
 m_target = 0
-P_target = 0
+p_target = 0
 pid = PID()
 
 
@@ -42,12 +42,14 @@ def control(data, lock):
     while True:
         # Updates the qube - Sends and receives data
         qube.update()
+        m_target = 0
 
         # Gets the logdata and writes it to the log file
         logdata = qube.getLogData(m_target, p_target)
         save_data(logdata)
+        qube.setMotorVoltage(0)
 
-        # Multithreading stuff that must happen. Dont mind it.
+        # Multithreading stuff that must happen. Don't mind it.
         with lock:
             doMTStuff(data)
 
