@@ -19,7 +19,7 @@ from time import time
 import threading
 
 # Replace with the Arduino port. Can be found in the Arduino IDE (Tools -> Port:)
-port = "COM6"
+port = "COM0"
 baudrate = 115200
 qube = QUBE(port, baudrate)
 
@@ -31,6 +31,10 @@ qube.resetPendulumEncoder()
 enableLogging()
 
 t_last = time()
+
+m_target = 0
+P_target = 0
+pid = PID()
 
 
 def control(data, lock):
