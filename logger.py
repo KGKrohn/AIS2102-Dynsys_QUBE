@@ -2,7 +2,7 @@ import csv
 import os
 import time
 
-LOGGING = False
+LOGGING = True
 
 fieldnames = [
     "time",

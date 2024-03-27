@@ -1,5 +1,7 @@
 import sys
 
+import numpy as np
+
 
 class PID:
     def __init__(self):
@@ -10,6 +12,12 @@ class PID:
         self.lastIntegral = 0
         self.lastError = 0
         self.useWindup = False
+
+    def state_space(self):
+        Dm=1
+        A = np.array(
+            [[0, 1], [0, -(295147905179352825856 * Dm) / 1357680363825023 - 6490641434437103 / 1357680363825023]])
+        return
 
     def regulate(self):
         # Implement controller using this function

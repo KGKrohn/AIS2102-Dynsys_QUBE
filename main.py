@@ -4,6 +4,7 @@
 # qube.setMotorVoltage(volts) - Applies the given voltage to the motor. Volts range from (-24, 24).
 # qube.resetMotorEncoder() - Resets the motor encoder in the current position.
 # qube.resetPendulumEncoder() - Resets the pendulum encoder in the current position.
+import numpy as np
 
 # qube.getMotorPosition() - Returns the cumulative angular positon of the motor.
 # qube.getPendulumPosition() - Returns the cumulative angular position of the pendulum.
@@ -19,7 +20,7 @@ from time import time
 import threading
 
 # Replace with the Arduino port. Can be found in the Arduino IDE (Tools -> Port:)
-port = "COM6"
+port = "COM8"
 baudrate = 115200
 qube = QUBE(port, baudrate)
 
@@ -35,10 +36,16 @@ t_last = time()
 m_target = 0
 p_target = 0
 pid = PID()
+y = 0
+x = 0
+dt = 0.05
+X = 0
+i = 0
 
 
 def control(data, lock):
-    global m_target, p_target, pid
+    global m_target, p_target, pid, dt, y, x, i
+
     while True:
         # Updates the qube - Sends and receives data
         qube.update()
@@ -47,15 +54,27 @@ def control(data, lock):
         # Gets the logdata and writes it to the log file
         logdata = qube.getLogData(m_target, p_target)
         save_data(logdata)
-        qube.setMotorVoltage(0)
 
+        duration = 10
+        tot_samp = int(duration / dt)
+        time_axis = np.linspace(0, duration, tot_samp)
+        ramp = 18 * time_axis / duration
+        if i < ramp.size:
+            y = ramp[i]
+
+        i += 1
+
+        x = x + dt
+
+        if (x > 15):
+            y = 0
+        qube.setMotorVoltage(y)
         # Multithreading stuff that must happen. Don't mind it.
         with lock:
             doMTStuff(data)
 
-        # Get deltatime
+        # Get deltatim
         dt = getDT()
-
         ### Your code goes here
 
 
