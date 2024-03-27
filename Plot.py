@@ -4,7 +4,7 @@ import Simulation
 
 # Define the CSV file and field names
 output_dir = 'Gen_Data'
-output_file = f'{output_dir}/log2.csv'
+output_file = f'{output_dir}/log0.csv'
 fieldnames = ["time", "motor_angle", "motor_setpoint", "pendulum_angle", "pendulum_setpoint", "rpm", "voltage",
               "current"]
 
@@ -23,7 +23,7 @@ plt.grid()
 plt.style.use('ggplot')
 
 plt.plot(time_values, rpm_values, label='physical', color='blue')
-t, y = Simulation.get_sim()
+t, y = Simulation.get_sim_ramp()
 plt.plot(t, y, label='simulation', color='green')
 plt.xlabel('time')
 plt.ylabel('rpm')

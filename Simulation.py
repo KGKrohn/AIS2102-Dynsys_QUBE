@@ -25,9 +25,25 @@ def get_sim():
     D = sys.D
     sys_ss = ctrl.StateSpace(A, B, C, D)
     # Set a step response on the system
+    t, y = ctrl.step_response(sys_ss, 0.4)
+    return t+3, y
 
-    s = ctrl.tf('s')
-    t, y = ctrl.step_response(sys_ss/(s),10)
+def get_sim_ramp():
+    Af = np.flipud(sys.A)
+    A = np.fliplr(Af)
+    B = np.rot90(sys.C, 1, (1, 0))
+    C = np.array([0, 1 / (2 * np.pi * 1 / 60)])  # 1 / (2 * np.pi * 1 / 60)
+    D = sys.D
+    sys_ss = ctrl.StateSpace(A, B, C, D)
+    # Set a step response on the system
+
+    dt = 0.01
+    duration = 10
+    tot_samp = int(duration / dt)
+    time_axis = np.linspace(0, duration, tot_samp)
+    ramp = 18 * time_axis / duration
+
+    t, y = ctrl.forced_response(sys_ss, time_axis, ramp)
     return t+3, y
 
 
