@@ -54,20 +54,13 @@ def control(data, lock):
         # Gets the logdata and writes it to the log file
         logdata = qube.getLogData(m_target, p_target)
         save_data(logdata)
+        pid = PID()
 
-        duration = 10
-        tot_samp = int(duration / dt)
-        time_axis = np.linspace(0, duration, tot_samp)
-        ramp = 18 * time_axis / duration
-        if i < ramp.size:
-            y = ramp[i]
+        y=PID.regulate(pid,QUBE.getMotorAngle(qube),QUBE.getMotorRPM(qube),45)
+        print(y)
 
-        i += 1
 
-        x = x + dt
 
-        if (x > 15):
-            y = 0
         qube.setMotorVoltage(y)
         # Multithreading stuff that must happen. Don't mind it.
         with lock:
