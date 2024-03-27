@@ -24,10 +24,12 @@ def get_sim():
     C = np.array([0, 1 / (2 * np.pi * 1 / 60)])  # 1 / (2 * np.pi * 1 / 60)
     D = sys.D
     sys_ss = ctrl.StateSpace(A, B, C, D)
+    print(A)
+    print(B)
+    print(C)
+    print(D)
     # Set a step response on the system
-
-    s = ctrl.tf('s')
-    t, y = ctrl.step_response(sys_ss/(s),10)
+    t, y = ctrl.step_response(sys_ss,0.4)
     return t+3, y
 
 
