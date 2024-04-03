@@ -44,38 +44,32 @@ i = 0
 
 
 def control(data, lock):
-    global m_target, p_target, pid, dt, y, x, i
+    global m_target, p_target, pid, dt, y, x, i, x_prev, r
 
     while True:
         # Updates the qube - Sends and receives data
         qube.update()
-        m_target = 0
-
         # Gets the logdata and writes it to the log file
+        m_target = 0
         logdata = qube.getLogData(m_target, p_target)
         save_data(logdata)
         pid = PID()
-
-        y=PID.regulate(pid,QUBE.getMotorAngle(qube),QUBE.getMotorRPM(qube),45)
-        print(y)
-
-
-
-        qube.setMotorVoltage(y)
-        # Multithreading stuff that must happen. Don't mind it.
         with lock:
             doMTStuff(data)
+        dt = getDT()
+        y1, y2 = PID.regulate(pid, QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 0, 400, dt)
+        #print("dt: ", dt)
+        qube.setMotorVoltage(y1)
+        # Multithreading stuff that must happen. Don't mind it.
 
         # Get deltatim
-        dt = getDT()
-        ### Your code goes here
 
 
 def getDT():
     global t_last
     t_now = time()
     dt = t_now - t_last
-    t_last += dt
+    t_last = t_now
     return dt
 
 
