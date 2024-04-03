@@ -6,9 +6,9 @@ import time
 
 class PID:
     def __init__(self):
-        self.kp = 0
-        self.ki = 0
-        self.kd = 0
+        self.Kp = 0
+        self.Ki = 0
+        self.Kd = 0
         self.A = np.array([[0, 1], [0, - 51.02173913]])
         self.B = np.array([[0], [1086.95652174]])
         self.C = np.array([0, 9.54929659])
@@ -55,46 +55,9 @@ class PID:
         self.B = pid.B
         self.C = pid.C
         self.D = pid.D
-        self.kp = pid.kp
-        self.ki = pid.ki
-        self.kd = pid.kd
+        self.Kp = pid.Kp
+        self.Ki = pid.Ki
+        self.Kd = pid.Kd
         self.windup = pid.windup
         self.useWindup = pid.useWindup
 
-    def compute(self, systemValue):
-        self.dt = time.time() - self.start_time
-        self.error = self.setpoint - systemValue
-        self.IntegralError += self.error * self.dt
-        self.IntegralError = np.clip(self.IntegralError, a_min=-5, a_max=5)  # integral windup
-        self.DerivativeError = (self.error - self.lastError) / self.dt
-
-        output = (-self.Kp * self.error) + (-self.Ki * self.IntegralError) + (-self.Kd * self.DerivativeError)
-
-        self.lastError = self.error
-        self.start_time = time.time()
-
-        return output
-
-    def define_filtered_output(self, error, IntegralError, DerivativeError):
-        output = (-self.Kp * error) + (-self.Ki * IntegralError) + (-self.Kd * DerivativeError)
-        return output
-
-    def updateSetpoint(self, newsetpoint):
-        self.setpoint = newsetpoint
-
-    def getSetpoint(self):
-        return self.setpoint
-
-    def resetErrors(self):
-        self.lastError = 0
-        self.IntegralError = 0
-        self.DerivativeError = 0
-
-    def getError(self):
-        return self.error
-
-    def getIntegralError(self):
-        return self.IntegralError
-
-    def getDerivativeError(self):
-        return self.DerivativeError
