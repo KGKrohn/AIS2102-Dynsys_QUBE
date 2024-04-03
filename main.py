@@ -57,9 +57,9 @@ def control(data, lock):
         with lock:
             doMTStuff(data)
         dt = getDT()
-        y1, y2 = PID.regulate(pid, QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 0, 400, dt)
+        y1, y2 = PID.regulate(pid, QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 40, 400, dt)
         #print("dt: ", dt)
-        qube.setMotorVoltage(y1)
+        qube.setMotorVoltage(y2)
         # Multithreading stuff that must happen. Don't mind it.
 
         # Get deltatim
