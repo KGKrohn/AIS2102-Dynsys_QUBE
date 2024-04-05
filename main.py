@@ -18,6 +18,7 @@ from com import *
 from liveplot import *
 from time import time
 import threading
+from PID_TF import PID_TF
 
 # Replace with the Arduino port. Can be found in the Arduino IDE (Tools -> Port:)
 port = "COM8"
@@ -36,6 +37,8 @@ t_last = time()
 m_target = 0
 p_target = 0
 pid = PID()
+pid_tf_rmp = PID_TF(0.0015, 0.0290, 0, 300) # Normal PID
+pid_tf_angle = PID_TF(0.004, 0.02, 0, 45)   # Normal PID
 y = 0
 x = 0
 dt = 0.05
@@ -44,45 +47,34 @@ i = 0
 
 
 def control(data, lock):
-    global m_target, p_target, pid, dt, y, x, i
+    global m_target, p_target, pid, dt, y, x, i, x_prev, r,pid_tf_angle
 
     while True:
         # Updates the qube - Sends and receives data
         qube.update()
-        m_target = 0
-
         # Gets the logdata and writes it to the log file
+        m_target = 0
         logdata = qube.getLogData(m_target, p_target)
         save_data(logdata)
-
-        duration = 10
-        tot_samp = int(duration / dt)
-        time_axis = np.linspace(0, duration, tot_samp)
-        ramp = 18 * time_axis / duration
-        if i < ramp.size:
-            y = ramp[i]
-
-        i += 1
-
-        x = x + dt
-
-        if (x > 15):
-            y = 0
-        qube.setMotorVoltage(y)
-        # Multithreading stuff that must happen. Don't mind it.
         with lock:
             doMTStuff(data)
+        dt = getDT()
+
+        output_x = pid_tf_angle.compute(QUBE.getMotorAngle(qube), dt)
+        #output_x = pid_tf_rmp.compute(QUBE.getMotorRPM(qube), dt)
+        # y1, y2 = PID.regulate(pid, QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 40, 400, dt)
+        # print("dt: ", dt)
+        qube.setMotorVoltage(output_x)
+        # Multithreading stuff that must happen. Don't mind it.
 
         # Get deltatim
-        dt = getDT()
-        ### Your code goes here
 
 
 def getDT():
     global t_last
     t_now = time()
     dt = t_now - t_last
-    t_last += dt
+    t_last = t_now
     return dt
 
 
