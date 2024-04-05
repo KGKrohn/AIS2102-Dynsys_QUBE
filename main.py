@@ -37,19 +37,20 @@ t_last = time()
 m_target = 0
 p_target = 0
 pid = PID()
-pid_tf_rmp = PID_TF(0.0015, 0.0290, 0, 300) # Normal PID
-pid_tf_angle = PID_TF(0.004, 0.02, 0, 45)   # Normal PID
+pid_tf_rmp = PID_TF(0.0015, 0.0290, 0, 300)  # Normal PID
+pid_tf_angle = PID_TF(0.004, 0.02, 0, 45)  # Normal PID
 y = 0
 x = 0
 dt = 0.05
 X = 0
 i = 0
 
-
+t_0 = time()
 def control(data, lock):
-    global m_target, p_target, pid, dt, y, x, i, x_prev, r,pid_tf_angle
+    global m_target, p_target, pid, dt, y, x, i, x_prev, r, pid_tf_angle
 
     while True:
+        t_now = time() - t_0
         # Updates the qube - Sends and receives data
         qube.update()
         # Gets the logdata and writes it to the log file
@@ -59,15 +60,20 @@ def control(data, lock):
         with lock:
             doMTStuff(data)
         dt = getDT()
+        print("dt: ",dt)
+        if  t_now >= 5 :
+            #U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 1000, dt)
+            U = PID.Controller_I_SS(pid, QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
+        else :
+            U = 00
 
-        output_x = pid_tf_angle.compute(QUBE.getMotorAngle(qube), dt)
-        #output_x = pid_tf_rmp.compute(QUBE.getMotorRPM(qube), dt)
-        # y1, y2 = PID.regulate(pid, QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 40, 400, dt)
-        # print("dt: ", dt)
-        qube.setMotorVoltage(output_x)
-        # Multithreading stuff that must happen. Don't mind it.
 
-        # Get deltatim
+
+        # output_x = pid_tf_angle.compute(QUBE.getMotorAngle(qube), dt)
+        # output_x = pid_tf_rmp.compute(QUBE.getMotorRPM(qube), dt)
+
+        # print(U)
+        qube.setMotorVoltage(U)
 
 
 def getDT():

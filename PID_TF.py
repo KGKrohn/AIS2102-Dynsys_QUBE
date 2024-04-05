@@ -1,4 +1,3 @@
-import numpy as np
 
 
 class PID_TF:
@@ -18,8 +17,6 @@ class PID_TF:
         self.IntegralError += self.error * dt
         #self.IntegralError = np.clip(self.IntegralError, a_min=-100, a_max=100)  # integral windup
         self.DerivativeError = (self.error - self.lastError) / dt
-        print("error", self.error)
-        print("IntegralError", self.IntegralError)
         output = (self.Kp * self.error) + (self.Ki * self.IntegralError) + (self.Kd * self.DerivativeError)
 
         self.lastError = self.error
