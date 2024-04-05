@@ -30,7 +30,7 @@ qube.resetMotorEncoder()
 qube.resetPendulumEncoder()
 
 # Enables logging - comment out to remove
-enableLogging()
+#enableLogging()
 
 t_last = time()
 
@@ -59,11 +59,10 @@ def control(data, lock):
         save_data(logdata)
         with lock:
             doMTStuff(data)
-        dt = getDT()
-        print("dt: ",dt)
+
         if  t_now >= 5 :
-            #U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 1000, dt)
-            U = PID.Controller_I_SS(pid, QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
+            U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 1000)
+            #U = pid.Controller_I_SS(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0)
         else :
             U = 00
 
@@ -76,12 +75,6 @@ def control(data, lock):
         qube.setMotorVoltage(U)
 
 
-def getDT():
-    global t_last
-    t_now = time()
-    dt = t_now - t_last
-    t_last = t_now
-    return dt
 
 
 def doMTStuff(data):

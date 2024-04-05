@@ -31,42 +31,45 @@ class PID:
     def get_state_space(self):
         return self.A, self.B, self.C, self.D
 
-    def Controller_rpm(self,M_rpm ,set_rpm,dt):
+    def Controller_rpm(self,M_rpm ,set_rpm):
         B = 4
+        dt = 0.01
         error_rpm_dt = (set_rpm - M_rpm) * dt
         U = B * error_rpm_dt
         return U
 
-    def Controller_I_SS(self, M_angle, rpm, set_angle, set_rpm, dt):
+    def Controller_I_SS(self, M_angle, rpm, set_angle, set_rpm):
         # Implement controller using this function
-        kp1 = 7.1167  #20.3709 # # 448.3557 #9.7897 # 0.0979
-        kp2 = 0.5639 # 0.2981 #  # 0.7124##0.0512 # -0.0371
+        kp1 =7.4828 #6.1452#1.8213 #20.3709 # # 448.3557 #9.7897 # 0.0979
+        kp2 =0.6531 #0.3856#0.1256 # 0.2981 #  # 0.7124##0.0512 # -0.0371
 
         # kp1 = 7.5969
         # kp2 = 0.0667
         # kp3 = -0.0001
         K = np.array([kp1, kp2])
         # Ke = kp3
-        error_angle = float(dt * (set_angle-M_angle))
-        error_rpm = float(dt * (set_rpm-rpm))
+        dt = 0.01
+        error_angle_dt = float((set_angle - M_angle) * dt)
+        error_rpm_dt = float((set_rpm - rpm) * dt)
 
 
-        x1_next = self.x1_prev + (error_angle)
-        print("error",x1_next)
-        x2_next = self.x2_prev + (error_rpm)
+        x1_next = self.x1_prev + (error_angle_dt)
+        x1_next = np.clip(x1_next,a_min = -5,a_max = 5)
+        x2_next = self.x2_prev + (error_rpm_dt)
+        #x2_next = np.clip(x2_next, a_min=-5, a_max=5)
         x = np.array([[x1_next], [x2_next]])
 
-        U = np.dot(K,x)
+        U = K @ x
         self.x1_prev = x1_next
         self.x2_prev = x2_next
-        self.U_k = U
         return U
 
 
-    def Controller_SS_Vanilla(self, M_angle, rpm, set_angle, set_rpm, dt):
+    def Controller_SS_Vanilla(self, M_angle, rpm, set_angle, set_rpm):
         # Implement controller using this function
-        kp1 = 7.1167    #1.8213 #20.3709 # # 448.3557 #9.7897 # 0.0979
-        kp2 = 0.5639#0.1256 # 0.2981 #  # 0.7124##0.0512 # -0.0371
+        kp1 =6.1452#1.8213 #20.3709 # # 448.3557 #9.7897 # 0.0979
+        kp2 =0.3856#0.1256 # 0.2981 #  # 0.7124##0.0512 # -0.0371
+        dt = 0.01
         error_angle_dt = float((set_angle - M_angle) * dt)
         error_rpm_dt = float((set_rpm - rpm) * dt)
 
@@ -94,10 +97,7 @@ class PID:
         #zeros(size(B))];
         #Cco = [C zeros(size(C))];
         #Dco = 0;
-
         x_hat = self.x_hat_prev + dt*(self.A @ self.x_hat_prev + self.B * self.U_k + L @ (M_angle - self.C * self.x_hat_prev))
-
-
         U = K @ x_hat
         self.x_hat_prev = x_hat
         return U
