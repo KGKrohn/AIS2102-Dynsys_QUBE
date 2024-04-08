@@ -3,15 +3,15 @@ import control as ctrl
 import matplotlib.pyplot as plt
 
 Ra = 8.4
-Kb = 0.042  # V/Rad/s
-Kt = 0.042  # Nm/s
-Ja = 4.0 * 10 ** (-6)  # kg-m2
-JL = 0.6 * 10 ** (-6)  # Module attachment moment of Inertia 0.6 × 10−6 kg-m2
+Kb = 0.042#V/Rad/s
+Kb = Kb *(2 * np.pi * 1 / 60)#%rad/s to rpm.
+Kt = 0.042 # Nm/s
+Ja = 4.0 * 10**(-6)# kg-m2
+JL = 0.6 * 10**(-6)#  % Module attachment moment of Inertia 0.6 × 10−6 kg-m2
 Jd = 1.63 * 10**(-5)
-Jm = Ja + JL + Jd
-Dm = 2.47 * 10 ** (-5)  # Fysisk
-# Dm = 7.47 * 10 ** (-6)  # Fysisk
-num = np.array([0, Kt / (Jm * Ra)])
+Jm = Ja + JL# + Jd
+Dm = 2.47 * 10**(-5)#Fysisk
+num = np.array([Kt / (Jm * Ra)])
 den = np.array([1, (Dm + (Kb * Kt) / Ra) / Jm, 0])
 sys = ctrl.tf2ss(num, den)
 
@@ -35,21 +35,41 @@ def calc_l_observer():
 
     return Acl
 
+def get_sim_val():
+    tc = 0.141
+    td = 0.024
+    T = tc + td
+    v = 1164
+    num_1 = np.array([v / T])
+    den_1 = np.array([1, 1/T, 0])
+    sys_1 = ctrl.tf2ss(num_1, den_1)
+    Af = np.flipud(sys_1.A)
+    A = np.fliplr(Af)
+    B = np.rot90(sys_1.C, 1, (1, 0))
+    C = np.array([1, 0])
+    D = sys_1.D
 
-calc_l_observer()
+    sys_ss = ctrl.StateSpace(A, B, C, D)
+    # Set a step response on the system
+    t, y = ctrl.step_response(sys_ss, 2)
+    return t, y
 
 
 # Extract state-space matrices
-def get_sim():
+def get_sim(actual):
     Af = np.flipud(sys.A)
     A = np.fliplr(Af)
     B = np.rot90(sys.C, 1, (1, 0))
-    C = np.array([0, 1 / (2 * np.pi * 1 / 60)])  # 1 / (2 * np.pi * 1 / 60)
+    K = Kt / (Jm * Ra)
+    alpha  = (Dm + (Kb * Kt) / Ra) / Jm
+    Ts = K/alpha
+    scale = actual/Ts
+    C = np.array([0,1])
     D = sys.D
     sys_ss = ctrl.StateSpace(A, B, C, D)
     # Set a step response on the system
-    t, y = ctrl.step_response(sys_ss, 0.4)
-    return t + 3, y
+    t, y = ctrl.step_response(sys_ss, 2)
+    return t, y
 
 
 def get_sim_ramp():

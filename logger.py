@@ -45,12 +45,12 @@ def enableLogging():
     LOGGING = True
 
 
-def save_data(data):
+def save_data(data,elapsedTime):
     if not LOGGING:
         return
     global counter
     global filename
-    elapsedTime = round(time.time() - startTime, 3)
+
 
     with open(filename, "a", newline="") as csv_file:
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
