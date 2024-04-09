@@ -37,14 +37,16 @@ t_last = time()
 m_target = 0
 p_target = 0
 pid = PID()
-# pid_tf_rmp = PID_TF(0.0015, 0.0290, 0, 300)  # Normal PID
-# pid_tf_angle = PID_TF(0.004, 0.02, 0, 45)  # Normal PID
+
 y = 0
 x = 0
 X = 0
 i = 0
 t_prev = 0
 t_0 = time()
+
+pid_tf_rmp = PID_TF(0.01, 0.1, 0.00001, 0)  # Normal PID
+pid_tf_angle = PID_TF(0.02, 0.08, 0.003, 0)  # Normal PID
 
 
 def control(data, lock):
@@ -61,25 +63,33 @@ def control(data, lock):
         m_target = 0
         logdata = qube.getLogData(m_target, p_target)
         save_data(logdata, t_now)
-
         with lock:
             doMTStuff(data)
 
         # pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
-        if t_now >= 5:
-            U = pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
+        if t_now >= 5 and not (t_now > 8):
+            U = 5  # = pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
+            # U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 1500,dt)
+            # pid_tf_angle.updateSetpoint(60)
 
 
+        elif t_now >= 8:
+            U = 5  # = pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 20, 0, dt)
+            # pid_tf_angle.updateSetpoint(20)
+            # U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 750,dt)
         else:
+            # pid_tf_angle.updateSetpoint(0)
             U = 0
+        # U = pid_tf_angle.compute(QUBE.getMotorAngle(qube), dt)
+        # U = pid_tf_rmp.compute(QUBE.getMotorRPM(qube), dt)
 
         # U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 1000)
         # U = pid.Controller_SS_Vanilla(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
 
         # U = pid.Controller_SS_Vanilla(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
+        #if t_now >= 12:
+        #    break
 
-        # output_x = pid_tf_angle.compute(QUBE.getMotorAngle(qube), dt)
-        # output_x = pid_tf_rmp.compute(QUBE.getMotorRPM(qube), dt)
         # print(U)
         qube.setMotorVoltage(U)
         t_prev = t_now_2

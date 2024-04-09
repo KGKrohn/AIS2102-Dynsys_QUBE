@@ -50,7 +50,6 @@ def get_sim_val():
     D = sys_1.D
 
     sys_ss = ctrl.StateSpace(A, B, C, D)
-    # Set a step response on the system
     t, y = ctrl.step_response(sys_ss, 2)
     return t, y
 
@@ -64,7 +63,7 @@ def get_sim(actual):
     alpha  = (Dm + (Kb * Kt) / Ra) / Jm
     Ts = K/alpha
     scale = actual/Ts
-    C = np.array([0,1])
+    C = np.array([0,scale])
     D = sys.D
     sys_ss = ctrl.StateSpace(A, B, C, D)
     # Set a step response on the system
