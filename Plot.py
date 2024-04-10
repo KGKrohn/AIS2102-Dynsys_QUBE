@@ -4,7 +4,7 @@ import Simulation
 
 # Define the CSV file and field names
 output_dir = 'Gen_Data'
-output_file = f'{output_dir}/Phys.csv'
+output_file = f'{output_dir}/Observer.csv'
 output_file2 = f'{output_dir}/RPM_PID.csv'
 fieldnames = ["time", "motor_angle", "motor_setpoint", "pendulum_angle", "pendulum_setpoint", "rpm", "voltage",
               "current"]
@@ -25,14 +25,16 @@ volt_values2 = data2['voltage']
 # plt.figure(figsize=(10, 5))
 plt.grid()
 plt.style.use('ggplot')
-t, y = Simulation.get_sim(1160)
-plt.plot(t, y, label='Sim', color='red')
-#plt.plot(time_values, rpm_values, label='Pysical', color='blue')
+t, y = Simulation.get_sim_math(1160)
+t1, y1 = Simulation.get_sim_estim()
+#plt.plot(t+5, y, label='Observer', color='purple')
+#plt.plot(t1+5, y1, label='Sim_estim', color='red')
+plt.plot(time_values, m_angle_values, label='Observer', color='blue')
 plt.xlabel('time')
 plt.ylabel('angle')
-plt.xlim((-0.1, 1.5))
-plt.ylim((-10, 1750))
+plt.xlim((4.9, 10))
+plt.ylim((-10, 70))
 plt.legend()
-plt.title('sim')
+plt.title('sim vs step-respons')
 plt.tight_layout()
 plt.show()

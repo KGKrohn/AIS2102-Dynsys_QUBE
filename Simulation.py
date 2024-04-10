@@ -9,7 +9,7 @@ Kt = 0.042 # Nm/s
 Ja = 4.0 * 10**(-6)# kg-m2
 JL = 0.6 * 10**(-6)#  % Module attachment moment of Inertia 0.6 × 10−6 kg-m2
 Jd = 1.63 * 10**(-5)
-Jm = Ja + JL# + Jd
+Jm = Ja + JL + Jd
 Dm = 2.47 * 10**(-5)#Fysisk
 num = np.array([Kt / (Jm * Ra)])
 den = np.array([1, (Dm + (Kb * Kt) / Ra) / Jm, 0])
@@ -35,11 +35,11 @@ def calc_l_observer():
 
     return Acl
 
-def get_sim_val():
+def get_sim_estim():
     tc = 0.141
     td = 0.024
     T = tc + td
-    v = 1164
+    v = 1160
     num_1 = np.array([v / T])
     den_1 = np.array([1, 1/T, 0])
     sys_1 = ctrl.tf2ss(num_1, den_1)
@@ -48,22 +48,24 @@ def get_sim_val():
     B = np.rot90(sys_1.C, 1, (1, 0))
     C = np.array([1, 0])
     D = sys_1.D
-
     sys_ss = ctrl.StateSpace(A, B, C, D)
-    t, y = ctrl.step_response(sys_ss, 2)
+    t, y = ctrl.step_response(sys_ss, 3)
     return t, y
 
 
 # Extract state-space matrices
-def get_sim(actual):
+def get_sim_math(actual):
     Af = np.flipud(sys.A)
     A = np.fliplr(Af)
     B = np.rot90(sys.C, 1, (1, 0))
+    B = B
     K = Kt / (Jm * Ra)
     alpha  = (Dm + (Kb * Kt) / Ra) / Jm
+
     Ts = K/alpha
     scale = actual/Ts
-    C = np.array([0,scale])
+    C = np.array([60,0])
+    print("A", A, "B", B, "C", C)
     D = sys.D
     sys_ss = ctrl.StateSpace(A, B, C, D)
     # Set a step response on the system
@@ -77,6 +79,7 @@ def get_sim_ramp():
     B = np.rot90(sys.C, 1, (1, 0))
     C = np.array([0, 1 / (2 * np.pi * 1 / 60)])  # 1 / (2 * np.pi * 1 / 60)
     D = sys.D
+
     sys_ss = ctrl.StateSpace(A, B, C, D)
     # Set a step response on the system
 

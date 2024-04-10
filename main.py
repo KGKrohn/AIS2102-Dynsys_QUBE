@@ -68,13 +68,15 @@ def control(data, lock):
 
         # pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
         if t_now >= 5 and not (t_now > 8):
-            U = 5  # = pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
+            U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 1500)
+            # = pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 60, 0, dt)
             # U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 1500,dt)
             # pid_tf_angle.updateSetpoint(60)
 
 
         elif t_now >= 8:
-            U = 5  # = pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 20, 0, dt)
+            U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 750)
+            # = pid.Observer(QUBE.getMotorAngle(qube), QUBE.getMotorRPM(qube), 20, 0, dt)
             # pid_tf_angle.updateSetpoint(20)
             # U = pid.Controller_rpm(QUBE.getMotorRPM(qube), 750,dt)
         else:
